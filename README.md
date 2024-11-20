@@ -1,0 +1,353 @@
+# dynamodb_pycrud
+
+`dynamodb_pycrud` is a Python package that provides a simple interface to perform basic CRUD operations on AWS DynamoDB using AWS Python SDK, `boto3`. This package allows developers to interact with DynamoDB tables programmatically with minimal setup. 
+
+## Table of Contents
+
+1. [Setup](#setup)
+   * [Create Virtual Environment](#create-virtual-environment)
+   * [AWS Configuration](#aws-configuration)
+2. [Installation](#installation)
+3. [Usage](#usage)
+   * [Create a Client](#create-a-client)
+   * [CRUD Operations](#crud-operations)
+4. [Contribution](#contribution)
+5. [License](#license)
+
+## Setup
+
+> [!TIP]
+> It's recommended to install the package inside a virtual environment. This ensures that dependencies are isolated from your global Python environment.
+
+### Create Virtual Environment
+
+using `venv`:
+
+```
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On MacOS/Linux:
+source venv/bin/activate
+
+# deactivate the virtual environment
+deactivate
+```
+
+using `conda`:
+
+```
+# Create a conda environment
+conda create --name myenv python=3.9
+
+# Activate the conda environment
+conda activate myenv
+
+# deactivate the virtual environment
+conda deactivate
+```
+
+### AWS Configuration
+
+3 ways for AWS configuration are enlilsted here. For more: <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration">Setup AWS Configuration</a>
+
+#### 1. Using `~/.aws.credentials` file
+
+This is the recommended approach for managing AWS credentials securely.
+
+1. **Locate or create the credentials file:**
+   - **Windows:** `C:\Users\<YourUsername>\.aws\credentials`
+   - **macOS/Linux:** `~/.aws/credentials`
+
+2. **Add your AWS credentials in the following format:**
+   ```ini
+   [default]
+   aws_access_key_id = YOUR_ACCESS_KEY_ID
+   aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
+   region = YOUR_REGION
+
+3. **Ensure that the file is secured (for macOS/Linux):**
+
+    ```
+   chmod 600 ~/.aws/credentials # set the permissions to restrict access
+    ```
+
+#### 2. Using a `.env` file
+
+Credentials can be stored in a `.env` file and loaded using `python-dotenv`.
+  1. Create a `.env` file in the project root directory:
+
+```
+    AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+    AWS_REGION=YOUR_REGION
+```
+      
+  2. Add `.env` file to `.gitignore` preventing sensitive information from being committed:
+
+```
+    .env
+```
+    
+  3. Load the `.env` file in your code:
+
+  ```
+  from dotenv import load_dotenv
+  import os
+      
+  load_dotenv()
+      
+  aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+  aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+  aws_region = os.getenv("AWS_REGION")
+  ```
+
+  ```
+  from dynamodb_pycrud import DynamoCrud
+
+  # Initialize the client
+  pycrud = DynamoCrud(aws_access_key_id="YOUR_AWS_ACCESS_KEY" or aws_access_key, 
+                      aws_secret_access_key="YOUR_AWS_SECRET_KEY" or aws_secret_key, 
+                      region_name="YOUR_AWS_REGION" or aws_region)
+  ```
+
+
+> [!CAUTION]
+> Avoid directly using aws keys inside the code and make sure to add sensitive files like `.env` and `~/.aws/credentials` to `.gitignore` file if they are inside the project directory.
+
+
+#### 3. Using Environment Variables
+
+Credentials can be set as environment variables.
+
+- *Windows (cmd):*
+
+  ```
+  set AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+  set AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+  set AWS_REGION=YOUR_REGION
+  ```
+
+- *MacOS/Linux (Bash):*
+
+  ```
+  export AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+  export AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+  export AWS_REGION=YOUR_REGION
+  ```
+To make these variables persistent:
+- *Windows:* Add them to the system environment variables via the Control Panel.
+- *MacOS/Linux:* Add them to shell profile (e.g., `.baschrc`, `.zshrc` or `.bash-profile`):
+
+  ```
+  echo "export AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID" >> ~/.bashrc
+  echo "export AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY" >> ~/.bashrc
+  echo "export AWS_REGION=YOUR_REGION" >> ~/.bashrc
+  ```
+  
+## Installation
+
+Install the package directly from the Github repository:
+
+```
+pip install git+https://github.com/Ahnaf19/dynamodb_pycrud.git
+```
+
+### [optional] install dependencies from requirements.txt
+
+> [!NOTE]
+> use the requirements.txt from the repository if any dependency issue arises
+
+```
+pip install -r requirements.txt
+```
+
+## Usage
+
+once installed, `DynamoCrud` class can be imported from the package:
+
+```
+from dynamodb_pycrud import DynamoCrud
+```
+
+### Create a Client
+
+Boto3, <a href="https://aws.amazon.com/sdk-for-python/">AWS SDK for Python</a>, looks at various configuration locations untill it finds configuration values. For about the lookup order, see: <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html">Configuration Overview</a>
+
+To start interacting with DynamoDB, initialize the `DynamoCrud` client:
+
+  ```
+# Create the client
+# if aws credentials are set up correctly, no need to pass the parameters, Boto3 handles that from the setup configuration
+pycrud = DynamoCrud(aws_access_key_id="YOUR_AWS_ACCESS_KEY", 
+                    aws_secret_access_key="YOUR_AWS_SECRET_KEY", 
+                    region_name="YOUR_AWS_REGION")
+
+  ```
+
+> [!CAUTION]
+> Avoid directly using aws keys inside the code and make sure to add sensitive files like `.env` and `~/.aws/credentials` to `.gitignore` file if they are inside the project directory.
+
+### CRUD Operations
+
+#### Create
+
+1. Create a Table
+
+Creates a DynamoDB table with a partition key and optional sort key and returns table metadata.
+
+   ```
+    pycrud.create_table(table_name, partition_key, sort_key=None, read_capacity=5, write_capacity=5)
+   ```
+
+Example:
+
+   ```
+    response = dynamo_crud.create_table(
+      table_name="MyTable",
+      partition_key="id",
+      partition_key_type="N",
+      sort_key="category",
+      sort_key_type="S",
+      read_capacity=2,
+      write_capacity=2,
+    )
+    print(response)
+   ```
+
+#### Read
+
+1. List all Tables
+
+Lists all available DynamoDB tables in given region and returns the list.
+
+   ```
+    pycrud.list_tables()
+   ```
+
+Example:
+
+   ```
+    tables = pycrud.list_tables()
+    print(tables)
+   ```
+
+2. Describe a Table
+
+Returns metadata of given DynamoDB table.
+
+   ```
+    pycrud.describe_table(table_name)
+   ```
+
+Example:
+
+   ```
+    table_description = pycrud.describe_table("MyTable")
+    print(table_description)
+   ```
+
+3. Get an Item
+
+Returns a single item from a DynamoDB table based on its primary key.
+
+   ```
+    pycrud.get_item(table_name="MyTable", item_key=item_key)
+   ```
+
+Example:
+
+   ```
+    item_key = {"id": 101, "title": "Book Title"}
+    response = pycrud.get_item(table_name="MyTable", item_key=item_key)
+    print(response)
+   ```
+
+4. Get all Items
+
+Returns all items from given DynamoDB table.
+
+   ```
+    pycrud.get_all_items("MyTable")
+   ```
+
+Example:
+
+   ```
+    items = pycrud.get_all_items("MyTable")
+    print(items)
+   ```
+
+#### Update
+
+1. Put an Item
+
+Inserts an item into the given DynamoDB table with **overwriting** control. The item is automatically converted to DynamoDB format using a helper function.
+
+   ```
+    pycrud.put_item(
+        table_name="Books",
+        item=item,
+        partition_key="id",
+        sort_key="title",
+        prevent_overwrite=True
+    )
+   ```
+
+Example:
+
+   ```
+    item = {"id": 25, "title": "The Great Gatsby", "year": 1925, "author": "F. Scott Fitzgerald"}
+    response = pycrud.put_item(
+        table_name="Books",
+        item=item,
+        partition_key="id",
+        sort_key="title",
+        prevent_overwrite=True
+    )
+    print(response)
+   ```
+
+#### Delete
+
+1. Delete an Item
+
+Deletes an item from a DynamoDB table based on given primary key and returns the deleted item dictionary.
+
+   ```
+    pycrud.delete_item(table_name="MyTable", item_key=item_key)
+   ```
+
+Example:
+
+   ```
+    item_key = {"id": 101, "title": "Book Title"}
+    response = pycrud.delete_item(table_name="MyTable", item_key=item_key)
+    print(response)
+   ```
+
+2. Delete a Table
+
+Deletes a specified DynamoDB table and returns the deleted table metadata.
+
+   ```
+    pycrud.delete_table("Books")
+   ```
+
+Example:
+
+   ```
+    response = pycrud.delete_table("Books")
+    print(response)
+   ```
+
+## Contribution
+
+Bug reports and pull requests are welcome on the <a href="https://github.com/Ahnaf19/dynamodb_pycrud">GitHub repo</a>
+
+## License
+
+This project is available as open source under the MIT License. See the [LICENSE](./LICENSE) file for details.
