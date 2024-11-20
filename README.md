@@ -1,4 +1,4 @@
-# dynamodb_pycrud
+# DynamoDB_Pycrud
 
 `dynamodb_pycrud` is a Python package that provides a simple interface to perform basic CRUD operations on AWS DynamoDB using AWS Python SDK, `boto3`. This package allows developers to interact with DynamoDB tables programmatically with minimal setup. 
 
@@ -215,7 +215,6 @@ Example:
       read_capacity=2,
       write_capacity=2,
     )
-    print(response)
    ```
 
 #### Read
@@ -232,7 +231,6 @@ Example:
 
    ```
     tables = pycrud.list_tables()
-    print(tables)
    ```
 
 2. Describe a Table
@@ -247,7 +245,6 @@ Example:
 
    ```
     table_description = pycrud.describe_table("MyTable")
-    print(table_description)
    ```
 
 3. Get an Item
@@ -263,7 +260,6 @@ Example:
    ```
     item_key = {"id": 101, "title": "Book Title"}
     response = pycrud.get_item(table_name="MyTable", item_key=item_key)
-    print(response)
    ```
 
 4. Get all Items
@@ -278,7 +274,6 @@ Example:
 
    ```
     items = pycrud.get_all_items("MyTable")
-    print(items)
    ```
 
 #### Update
@@ -308,7 +303,6 @@ Example:
         sort_key="title",
         prevent_overwrite=True
     )
-    print(response)
    ```
 
 #### Delete
@@ -326,7 +320,6 @@ Example:
    ```
     item_key = {"id": 101, "title": "Book Title"}
     response = pycrud.delete_item(table_name="MyTable", item_key=item_key)
-    print(response)
    ```
 
 2. Delete a Table
@@ -341,7 +334,6 @@ Example:
 
    ```
     response = pycrud.delete_table("Books")
-    print(response)
    ```
 
 ## Contribution
