@@ -1,7 +1,7 @@
 from typing import Optional, Literal
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError, PartialCredentialsError
-from dynamodb_pycrud_helpers import (
+from .dynamodb_pycrud_helpers import (
     validate_keys,
     check_item_keys,
     convert_to_dynamodb_format,
