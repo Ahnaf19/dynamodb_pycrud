@@ -182,7 +182,7 @@ pip install -r requirements.txt
 once installed, `DynamoCrud` class can be imported from the package:
 
 ```
-from dynamodb_pycrud import DynamoCrud
+from dynamodb_pycrud.dynamodb_pycrud import DynamoCrud
 ```
 
 ### Create a Client
