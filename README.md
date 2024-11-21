@@ -54,7 +54,7 @@ conda deactivate
 
 3 ways for AWS configuration are enlilsted here. For more: <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration">Setup AWS Configuration</a>
 
-#### 1. Using `~/.aws.credentials` file
+#### 1. Using `~/.aws/credentials` file
 
 This is the recommended approach for managing AWS credentials securely.
 
