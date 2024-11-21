@@ -71,10 +71,22 @@ This is the recommended approach for managing AWS credentials securely.
 
 3. **Ensure that the file is secured (for macOS/Linux):**
 
-    ```
-   chmod 600 ~/.aws/credentials # set the permissions to restrict access
-    ```
+  Confirm who is the owner:
+    
+  ```
+      whoami
+      ls -l ~/.aws/credentials
+  ```
 
+  If `whoami` matches the owner in the `ls` output, its safe to go with 600.
+    
+  ```
+      # set the permissions to restrict access
+      chmod 600 ~/.aws/credentials 
+  ```
+    
+  Run `ls -l ~/.aws/credentials` again to check updated restriction.
+  
 #### 2. Using a `.env` file
 
 Credentials can be stored in a `.env` file and loaded using `python-dotenv`.
