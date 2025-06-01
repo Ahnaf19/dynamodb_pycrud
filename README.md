@@ -1,6 +1,6 @@
 # DynamoDB_Pycrud
 
-`dynamodb_pycrud` is a Python package that provides a simple interface to perform basic CRUD operations on AWS DynamoDB using AWS Python SDK, `boto3`. This package allows developers to interact with DynamoDB tables programmatically with minimal setup. 
+`dynamodb_pycrud` is a Python package that provides a simple interface to perform basic CRUD operations on AWS DynamoDB using AWS Python SDK, `boto3`. This package allows developers to interact with DynamoDB tables programmatically with minimal setup.
 
 ## Table of Contents
 
@@ -72,21 +72,21 @@ This is the recommended approach for managing AWS credentials securely.
 3. **Ensure that the file is secured (for macOS/Linux):**
 
   Confirm who is the owner:
-    
+
   ```
       whoami
       ls -l ~/.aws/credentials
   ```
 
   If `whoami` matches the owner in the `ls` output, its safe to go with 600.
-    
+
   ```
       # set the permissions to restrict access
-      chmod 600 ~/.aws/credentials 
+      chmod 600 ~/.aws/credentials
   ```
-    
+
   Run `ls -l ~/.aws/credentials` again to check updated restriction.
-  
+
 #### 2. Using a `.env` file
 
 Credentials can be stored in a `.env` file and loaded using `python-dotenv`.
@@ -97,34 +97,46 @@ Credentials can be stored in a `.env` file and loaded using `python-dotenv`.
     AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
     AWS_REGION=YOUR_REGION
 ```
-      
+
   2. Add `.env` file to `.gitignore` preventing sensitive information from being committed:
 
 ```
     .env
 ```
-    
+
   3. Load the `.env` file in your code:
 
   ```
   from dotenv import load_dotenv
   import os
-      
+
   load_dotenv()
-      
+
   aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
   aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
   aws_region = os.getenv("AWS_REGION")
   ```
 
-  ```
+  ```python
+  # Example:
   from dynamodb_pycrud import DynamoCrud
+  from dotenv import load_dotenv
+  import os
 
-  # Initialize the client
-  pycrud = DynamoCrud(aws_access_key_id="YOUR_AWS_ACCESS_KEY" or aws_access_key, 
-                      aws_secret_access_key="YOUR_AWS_SECRET_KEY" or aws_secret_key, 
-                      region_name="YOUR_AWS_REGION" or aws_region)
+  # Load environment variables from .env
+  load_dotenv()
+
+  # Boto3 will automatically pick up AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION
+  # from environment variables if they are set.
+  # You can then initialize DynamoCrud, optionally specifying a region:
+  pycrud = DynamoCrud(region_name=os.getenv("AWS_REGION"))
+
+  # Or, if the region is already set in the environment or you want boto3's default:
+  # pycrud = DynamoCrud()
   ```
+
+  > [!NOTE]
+  > `boto3` automatically uses the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` environment variables if they are set. These variables are not directly passed into the `DynamoCrud` constructor.
 
 
 > [!CAUTION]
@@ -159,7 +171,7 @@ To make these variables persistent:
   echo "export AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY" >> ~/.bashrc
   echo "export AWS_REGION=YOUR_REGION" >> ~/.bashrc
   ```
-  
+
 ## Installation
 
 Install the package directly from the Github repository:
@@ -193,10 +205,13 @@ To start interacting with DynamoDB, initialize the `DynamoCrud` client:
 
   ```
 # Create the client
-# if aws credentials are set up correctly, no need to pass the parameters, Boto3 handles that from the setup configuration
-pycrud = DynamoCrud(aws_access_key_id="YOUR_AWS_ACCESS_KEY", 
-                    aws_secret_access_key="YOUR_AWS_SECRET_KEY", 
-                    region_name="YOUR_AWS_REGION")
+# If your AWS credentials and region are configured (e.g., via ~/.aws/credentials, environment variables),
+# boto3 will use them automatically.
+# You can optionally specify a region_name if you want to override the default or configured region.
+pycrud = DynamoCrud(region_name="YOUR_AWS_REGION")
+
+# If region_name is also configured or you want to use the default region for the session:
+# pycrud = DynamoCrud()
 
   ```
 
@@ -212,8 +227,10 @@ pycrud = DynamoCrud(aws_access_key_id="YOUR_AWS_ACCESS_KEY",
 Creates a DynamoDB table with a partition key and optional sort key and returns table metadata.
 
    ```
-    pycrud.create_table(table_name, partition_key, sort_key=None, read_capacity=5, write_capacity=5)
+    pycrud.create_table(table_name, partition_key, partition_key_type, sort_key=None, sort_key_type=None, read_capacity=5, write_capacity=5)
    ```
+   - `partition_key_type`: Type of the partition key ('S', 'N', 'B').
+   - `sort_key_type`: Type of the sort key ('S', 'N', 'B'), required if `sort_key` is provided.
 
 Example:
 
